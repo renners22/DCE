@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('inscripciones', function (Blueprint $table) {
             $table->id();
-            $table->date('fecha_inscripcion');
+            // $table->date('fecha_inscripcion');
             $table->boolean('estado');
-            $table->string('semestre');
+            // $table->string('semestre');
             $table->string('año_academico');
             // esta es una forma de relacionar anteriormente
             // $table->unsignedBigInteger('estudiante_id');

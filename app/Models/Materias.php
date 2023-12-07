@@ -10,10 +10,10 @@ class Materias extends Model
     use HasFactory;
 
     public function inscripciones() {
-        return $this->hasMany(Inscripciones::class, 'materia_id', 'id');
+        return $this->belongsTo(Inscripciones::class, 'materia_id', 'id');
     }
 
-    public function profesores() {
-        return $this->belongsToMany(profesores::class, 'materia_profesor', 'materia_id', 'profesor_id');
-    }
+    // public function docentes() {
+    //     return $this->belongsToMany(Docentes::class, 'materia_profesor', 'materia_id', 'profesor_id');
+    // }
 }

@@ -2,64 +2,118 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estudiantes;
 use App\Models\Inscripciones;
+use App\Models\Materias;
 use Illuminate\Http\Request;
 
 class InscripcionesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
-        //
+        
+        $inscripciones = Inscripciones::all();
+        return view('admin.inscripciones.inscripciones')->with('inscripciones', $inscripciones);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
-        //
+        $materias = Materias::all();
+        $estudiantes = Estudiantes::all();
+        return view('admin.inscripciones.create')->with('materias', $materias)->with('estudiantes', $estudiantes);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        //
+        $campos = [
+            'estado' => 'required',
+            'año_academico' => 'required',
+            'estudiante_id' => 'required',
+            'materia_id' => 'required',
+        ];
+
+        $error = [
+            'required'=>'el :attribute es requerido',
+        ];
+        
+
+        $this->validate($request, $campos, $error);
+
+        $inscripcion = new Inscripciones();
+        $inscripcion->estado = $request->estado;
+        $inscripcion->año_academico = $request->año_academico; 
+        $inscripcion->estudiante_id = $request->estudiante_id; 
+        $inscripcion->materia_id = $request->materia_id; 
+
+        try {
+            $inscripcion->save();
+            return redirect()->route('inscripciones')->with('mensaje', 'Inscripcion creada');
+        } catch (\Exception $e) {
+            // Manejar la excepción, por ejemplo, registrándola o mostrando un mensaje de error
+            return redirect()->back()->with('error', 'Error al crear la inscripción: ' . $e->getMessage());
+        }
+        
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(Inscripciones $inscripciones)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Inscripciones $inscripciones)
+    
+    public function edit(Inscripciones $inscripciones,$id)
     {
-        //
+        $inscripcion = Inscripciones::findOrFail($id);
+        $materias = Materias::all();
+        $estudiantes = Estudiantes::all();
+
+        return view('admin.inscripciones.edit')->with('inscripcion', $inscripcion)->with('materias', $materias)->with('estudiantes', $estudiantes);
+        
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Inscripciones $inscripciones)
+    
+    public function update(Request $request, Inscripciones $inscripciones, $id)
     {
-        //
+        
+
+        $campos = [
+            'estado' => 'required',
+            'año_academico' => 'required',
+            'estudiante_id' => 'required',
+            'materia_id' => 'required',
+        ];
+
+        $error = [
+            'required'=>'el :attribute es requerido',
+        ];
+        
+
+        $this->validate($request, $campos, $error);
+
+        $data = $request->except('_token', '_method');
+        try {
+            Inscripciones::where('id', '=', $id)->update($data);
+            return redirect()->route('inscripciones')->with('mensaje', 'Inscripcion actualizada');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al editar la inscripción: ' . $e->getMessage());
+        }
+
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Inscripciones $inscripciones)
+    
+    public function destroy(Inscripciones $inscripciones,$id)
     {
-        //
+        try {
+            Inscripciones::deleted($id);
+            return redirect()->route('inscripciones')->with('mensaje', 'Inscripcion eliminada');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar la inscripción: ' . $e->getMessage());
+        }
     }
 }

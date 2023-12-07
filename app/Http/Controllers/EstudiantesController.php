@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estudiantes;
+use Dotenv\Validator;
 use Illuminate\Http\Request;
 
 class EstudiantesController extends Controller
@@ -14,7 +15,6 @@ class EstudiantesController extends Controller
     {
         $data = Estudiantes::all();
         return view('admin.estudiantes.estudiantes')->with('data', $data);
-        // return view('admin.estudiantes.estudiantes');
     }
 
     /**
@@ -30,7 +30,7 @@ class EstudiantesController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->except('_token'));
+        
         $campos = [
             'nombre' => 'required|string|max:100',
             'apellido' => 'required|string|max:100',
@@ -38,9 +38,13 @@ class EstudiantesController extends Controller
             'numero_telefono' => 'required',
             'correo' => 'required|email',
         ];
+
+        $error = [
+            'required'=>'el :attribute es requerido',
+        ];
         
 
-        $this->validate($request, $campos);
+        $this->validate($request, $campos, $error);
         // $data = $request->except('_token');
         // Estudiantes::insert($data);
         // dd("validate true");
@@ -51,9 +55,14 @@ class EstudiantesController extends Controller
         $estudiante->numero_telefono = $request->numero_telefono;
         $estudiante->correo = $request->correo;
 
-        $estudiante->save();
-
-        return redirect()->route('estudiantes')->with('mensaje', "estudiante agregado");
+        try {
+            $estudiante->save();
+            return redirect()->route('estudiantes')->with('mensaje', "estudiante agregado");
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'No se pudo crear el estudiante' . $e->getMessage());
+        }
+        
     }
 
     /**
@@ -85,18 +94,24 @@ class EstudiantesController extends Controller
             'numero_telefono' => 'required|string',
             'correo' => 'required|email',
         ];
-        $msj = [
+        $error = [
             'required' => 'el :attribute es requerido',
 
         ];
 
-        $this->validate($request, $campos, $msj);
+        $this->validate($request, $campos, $error);
+
 
         $data = $request->except('_token', '_method');
 
-        Estudiantes::where('id', '=', $id)->update($data);
+        try {
+            Estudiantes::where('id', '=', $id)->update($data);
+            return redirect()->route('estudiantes')->with('mensaje', 'estudiante actualizado');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'No se pudo editar el estudiante' . $e->getMessage());
 
-        return redirect()->route('estudiantes');
+        }
     }
 
     /**
@@ -104,8 +119,14 @@ class EstudiantesController extends Controller
      */
     public function destroy( $id)
     {
-        Estudiantes::destroy($id);
+        try {
+            Estudiantes::destroy($id);
+            return redirect()->route('estudiantes')->with('mensaje', 'estudiante eliminado');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'No se pudo editar el estudiante' . $e->getMessage());
 
-        return redirect()->route('estudiantes');
+        }
+
     }
 }
