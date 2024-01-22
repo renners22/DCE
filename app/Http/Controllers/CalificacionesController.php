@@ -84,7 +84,12 @@ class CalificacionesController extends Controller
             'inscripcion_id' => 'required',
         ];
 
-        $this->validate($request, $campos);
+        $error = [
+            'required'=>'el :attribute es requerido',
+        ];
+
+        $this->validate($request, $campos, $error);
+        
         $data = $request->except('_token', '_method');
         
         try {
